@@ -8,22 +8,42 @@
 
 import Foundation
 
+/**********************************************************
+ * Dungeon resolves a dependency on GeneratorProtocol via
+ * constructor, and uses it to create a cell layout.
+ **********************************************************/
+
 class Dungeon {
     
     let generator: GeneratorProtocol
+    let size: Int
     
-    init(_ generator: GeneratorProtocol) {
+    let minimumSizeThreshold = 100  // try to make the layout larger than this when generating dungeon
+    let maximumRerollAttempts = 5   // number of times to retry if the dungeon is smaller than the minimum
+    
+    init(generator: GeneratorProtocol, size: Int) {
         self.generator = generator
+        self.size = max(minimumSizeThreshold, size)
     }
     
+    /**
+     * Creates a random layout based on the supplied generator.
+     * If the layout is smaller than the minimum size, we'll
+     * try again to get a layout that fulfills the requirement,
+     * up to the retry limit.
+     */
     func generateDungeon() -> [Cell] {
-        var cells = [Cell]()
-        repeat {
-            cells = generator.generateLayout(cellCount: 500)
-        }
-        while cells.count <= 25
+        var layout = generator.generateLayout(cellCount: size)
         
-        return cells
+        var attempts = 0
+        while layout.count < minimumSizeThreshold, attempts < maximumRerollAttempts {
+            attempts += 1
+            let newAttempt = generator.generateLayout(cellCount: size)
+            if newAttempt.count > layout.count {
+                layout = newAttempt
+            }
+        }
+        
+        return layout
     }
-    
 }

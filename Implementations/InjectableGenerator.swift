@@ -8,14 +8,25 @@
 
 import Foundation
 
+/**********************************************************
+ * An implementation of GeneratorProtocol that receives its
+ * dependency on CellSelectorProtocol via Constructor Injection.
+ **********************************************************/
+
 struct InjectableGenerator: GeneratorProtocol {
     
-    let cellSelector: CellSelectorProtocol // Dependency
+    let cellSelector: CellSelectorProtocol // Dependency Injected via constructor
     
     init(cellSelector: CellSelectorProtocol) {
         self.cellSelector = cellSelector
     }
     
+    /**
+     * Generates a connected list of `Cell`s by exploring
+     * around a root. Unexplored cells are added to and
+     * removed from the cellSelector based on the injected
+     * behavior.
+     */
     func generateLayout(cellCount: Int) -> [Cell] {
         let root = Cell(coord: (0, 0))
         

@@ -9,7 +9,5 @@
 import Foundation
 
 protocol GeneratorProtocol {
-    
     func generateLayout(cellCount: Int) -> [Cell]
-    
 }

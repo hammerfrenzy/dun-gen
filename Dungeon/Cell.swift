@@ -40,6 +40,15 @@ class Cell {
         self.parent = parent
     }
     
+    /**
+     * Rotates around the cell in a randomized order attempting
+     * to 'discover' new cells to add to the layout.
+     *
+     * - Parameters:
+     *    - existingCells: List of `Cell`s that have been previously discovered.
+     *
+     * - Returns: The `Cell`s that were discovered when exploring around this `Cell`.
+     */
     func explore(_ existingCells: [Cell]) -> [Cell] {
         shuffleDirections()
         
@@ -47,8 +56,10 @@ class Cell {
         
         for direction in directions {
             let newCoord = coordInDirection(direction, fromCoord: coord)
-            let shouldExplore = arc4random_uniform(2) == 0
+            let shouldExplore = arc4random_uniform(2) == 0 // RNG so we don't always check each direction
             if shouldExplore && !cellExistsAtCoord(newCoord, existingCells: existingCells) {
+                // If we decided to explore and there is not a cell already here,
+                // connect to the new cell & add it to the cells we've discovered.
                 let foundCell = Cell(coord: newCoord)
                 foundCell.visitFromCell(self)
                 foundCells.append(foundCell)

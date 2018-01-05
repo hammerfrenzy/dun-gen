@@ -8,6 +8,12 @@
 
 import Foundation
 
+/**********************************************************
+ * Implementation of CellSelectorProtocol
+ * that creates a dungeon in a breadth first order,
+ * resulting in a more 'blob-like' shape.
+ **********************************************************/
+
 struct BreadthFirstCellSelector: CellSelectorProtocol {
     
     var stack: Stack<Cell>
@@ -27,21 +33,4 @@ struct BreadthFirstCellSelector: CellSelectorProtocol {
     func hasAnotherCell() -> Bool {
         return stack.hasNext()
     }
-    
-    /*
-     * 'Implementations' specific to this class
-     */
-    
-    func specificEnqueue(_ cell: Cell) {
-        addCell(cell)
-    }
-    
-    func specificDequeue() -> Cell? {
-        return getNextCell()
-    }
-    
-    func specificHasAnotherCell() -> Bool {
-        return hasAnotherCell()
-    }
-    
 }

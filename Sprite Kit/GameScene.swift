@@ -10,40 +10,48 @@ import SpriteKit
 
 class GameScene: SKScene {
     
+    let maxDungeonCells = 500
+    
     override func keyDown(with event: NSEvent) {
-        guard let chars = event.characters else {
+        guard let chars = event.characters,
+            let input = Input(rawValue: chars) else {
             return
         }
-        
-        switch chars {
-        case "n", "N":
+
+        let dungeon: Dungeon
+        switch input {
+        case .nonInjectedLayout:
             let generator = Generator()
-            let dungeon = Dungeon(generator)
-            drawDungeon(dungeon)
+            dungeon = Dungeon(generator: generator, size: maxDungeonCells)
             
-        case "b", "B":
+        case .breadthFirstLayout:
             let selector = BreadthFirstCellSelector()
-            let generator = InjectableGenerator(cellSelector: selector)
-            let dungeon = Dungeon(generator)
-            drawDungeon(dungeon)
+            dungeon = dungeonBasedOnSelector(selector)
             
-        case "d", "D":
+        case .depthFirstLayout:
             let selector = DepthFirstCellSelector()
-            let generator = InjectableGenerator(cellSelector: selector)
-            let dungeon = Dungeon(generator)
-            drawDungeon(dungeon)
+            dungeon = dungeonBasedOnSelector(selector)
             
-        case "r", "R":
+        case .randomLayout:
             let selector: CellSelectorProtocol = arc4random_uniform(2) == 0 ? BreadthFirstCellSelector() : DepthFirstCellSelector()
-            let generator = InjectableGenerator(cellSelector: selector)
-            let dungeon = Dungeon(generator)
-            drawDungeon(dungeon)
-            
-        default: break
+            dungeon = dungeonBasedOnSelector(selector)
         }
+        
+        drawDungeon(dungeon)
     }
     
-    func drawDungeon(_ dungeon: Dungeon) {
+    private func dungeonBasedOnSelector(_ cellSelector: CellSelectorProtocol) -> Dungeon {
+        let generator = InjectableGenerator(cellSelector: cellSelector)
+        return Dungeon(generator: generator, size: maxDungeonCells)
+    }
+    
+    /**
+     * Draws the dungeon layout as a set of empty squares.
+     * The squares fill in over time, with the color based
+     * on the length of the shortest path from the root to
+     * the node.
+     */
+    private func drawDungeon(_ dungeon: Dungeon) {
         wipeMaze()
         
         let cells = dungeon.generateDungeon()
@@ -85,7 +93,10 @@ class GameScene: SKScene {
         }
     }
     
-    func wipeMaze() {
+    /**
+     * Removes the previous dungeon layout from the scene.
+     */
+    private func wipeMaze() {
         self.scene?.removeAllChildren()
     }
     
@@ -95,7 +106,7 @@ class GameScene: SKScene {
     // Typealias for HSV color values
     typealias HSV = (hue: CGFloat, saturation: CGFloat, brightness: CGFloat, alpha: CGFloat)
     
-    func hsv2rgb(_ hsv: HSV) -> RGB {
+    private func hsv2rgb(_ hsv: HSV) -> RGB {
         // Converts HSV to a RGB color
         var rgb: RGB = (red: 0.0, green: 0.0, blue: 0.0, alpha: 0.0)
         var r: CGFloat
@@ -128,5 +139,15 @@ class GameScene: SKScene {
         rgb.blue = b
         rgb.alpha = hsv.alpha
         return rgb
+    }
+    
+    /**
+     * Maps keyboard input to dungeon generation
+     */
+    private enum Input: String {
+        case nonInjectedLayout     = "n"
+        case breadthFirstLayout    = "b"
+        case depthFirstLayout      = "d"
+        case randomLayout          = "r"
     }
 }

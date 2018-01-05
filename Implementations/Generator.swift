@@ -8,8 +8,15 @@
 
 import Foundation
 
+/**********************************************************
+ * This implementation of GeneratorProtocol doesn't use
+ * dependency injection.  Rather than relying on a protocol
+ * definition of CellSelector, it always uses the concrete
+ * BreadthFirstCellSelector.
+ **********************************************************/
+
 struct Generator: GeneratorProtocol {
-    
+   
     func generateLayout(cellCount: Int) -> [Cell] {
         let cellSelector = BreadthFirstCellSelector() // Dependency isn't injected!
         let root = Cell(coord: (0, 0))
@@ -30,5 +37,21 @@ struct Generator: GeneratorProtocol {
         }
 
         return allCells
+    }
+}
+
+ //MARK: - Concrete BreadthFirstCellSelector implementations to use as examples in Generator.swift
+
+extension BreadthFirstCellSelector {
+    func specificEnqueue(_ cell: Cell) {
+        addCell(cell)
+    }
+    
+    func specificDequeue() -> Cell? {
+        return getNextCell()
+    }
+    
+    func specificHasAnotherCell() -> Bool {
+        return hasAnotherCell()
     }
 }
